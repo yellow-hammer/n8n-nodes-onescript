@@ -1,10 +1,12 @@
 {
 	"name": "n8n-nodes-onescript",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "n8n community node that executes OneScript",
 	"license": "MIT",
 	"homepage": "https://github.com/yellow-hammer/n8n-nodes-onescript#readme",
-	"keywords": ["n8n-community-node-package"],
+	"keywords": [
+		"n8n-community-node-package"
+	],
 	"author": {
 		"name": "Иван Карло",
 		"email": "i.karlo@outlook.com"
@@ -23,7 +25,10 @@
 		"prepublishOnly": "n8n-node prerelease",
 		"check": "node scripts/check-output.mjs"
 	},
-	"files": ["dist", "examples"],
+	"files": [
+		"dist",
+		"examples"
+	],
 	"publishConfig": {
 		"access": "public"
 	},
@@ -31,7 +36,9 @@
 		"n8nNodesApiVersion": 1,
 		"strict": false,
 		"credentials": [],
-		"nodes": ["dist/nodes/OneScript/OneScript.node.js"]
+		"nodes": [
+			"dist/nodes/OneScript/OneScript.node.js"
+		]
 	},
 	"devDependencies": {
 		"@n8n/node-cli": "*",
