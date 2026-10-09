@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-onescript",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "n8n community node that executes OneScript",
 	"license": "MIT",
 	"homepage": "https://github.com/yellow-hammer/n8n-nodes-onescript#readme",
@@ -24,6 +24,9 @@
 		"check": "node scripts/check-output.mjs"
 	},
 	"files": ["dist", "examples"],
+	"publishConfig": {
+		"access": "public"
+	},
 	"n8n": {
 		"n8nNodesApiVersion": 1,
 		"strict": false,
