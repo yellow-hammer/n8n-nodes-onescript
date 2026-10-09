@@ -1,0 +1,51 @@
+{
+	"name": "n8n-nodes-onescript",
+	"version": "0.1.0",
+	"description": "n8n community node that executes OneScript",
+	"license": "MIT",
+	"homepage": "https://github.com/yellow-hammer/n8n-nodes-onescript#readme",
+	"keywords": ["n8n-community-node-package"],
+	"author": {
+		"name": "Иван Карло",
+		"email": "i.karlo@outlook.com"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/yellow-hammer/n8n-nodes-onescript.git"
+	},
+	"scripts": {
+		"build": "n8n-node build",
+		"build:watch": "tsc --watch",
+		"dev": "n8n-node dev",
+		"lint": "n8n-node lint",
+		"lint:fix": "n8n-node lint --fix",
+		"release": "n8n-node release",
+		"prepublishOnly": "n8n-node prerelease",
+		"check": "node scripts/check-output.mjs"
+	},
+	"files": ["dist", "examples"],
+	"n8n": {
+		"n8nNodesApiVersion": 1,
+		"strict": false,
+		"credentials": [],
+		"nodes": ["dist/nodes/OneScript/OneScript.node.js"]
+	},
+	"devDependencies": {
+		"@n8n/node-cli": "*",
+		"eslint": "9.32.0",
+		"prettier": "3.6.2",
+		"release-it": "^21.1.0",
+		"typescript": "5.9.2"
+	},
+	"peerDependencies": {
+		"n8n-workflow": "*"
+	},
+	"overrides": {
+		"axios": "1.20.0",
+		"basic-ftp": "6.2.2",
+		"handlebars": "4.7.10",
+		"qs": "6.16.0",
+		"stream-json": "3.7.0",
+		"uuid": "11.1.1"
+	}
+}
