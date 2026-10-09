@@ -123,6 +123,10 @@ export class OneScript implements INodeType {
 				type: 'string',
 				typeOptions: {
 					editor: 'codeNodeEditor',
+					// javaScript включает сервис TypeScript и помечает идентификаторы BSL
+					// как неизвестные («Cannot find name»). html не проверяет имена.
+					// Свой язык и BSL Language Server редактор n8n из community-ноды не принимает.
+					editorLanguage: 'html',
 					rows: 16,
 				},
 				default: DEFAULT_CODE,
