@@ -198,6 +198,12 @@ oscript <сценарий.os> <путь-к-input.json>
 
 Текст вместо JSON, например `Сообщить("готово");`, даёт item `{ "stdout": "готово\n", "stderr": "", "exitCode": 0 }`. Точный перевод строки зависит от `Сообщить`.
 
+## Выпуск версии
+
+В GitHub откройте Actions → Publish → Run workflow. В поле версии укажите тег с префиксом `v`, например `v0.2.0`.
+
+Workflow запишет эту версию в `package.json` и `package-lock.json`, соберёт `CHANGELOG.md` через git-cliff, создаст тег и страницу релиза и опубликует пакет в npm.
+
 ## Ограничения
 
 - Нужен self-hosted n8n. На n8n Cloud свой бинарник `oscript` не поставить, поэтому у пакета выключена проверка n8n Cloud (`n8n.strict: false`).
