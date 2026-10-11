@@ -1,0 +1,76 @@
+{
+	"name": "OneScript Autumn: корзина",
+	"nodes": [
+		{
+			"parameters": {},
+			"id": "44444444-4444-4444-8444-444444444441",
+			"name": "Запуск",
+			"type": "n8n-nodes-base.manualTrigger",
+			"typeVersion": 1,
+			"position": [240, 300]
+		},
+		{
+			"parameters": {
+				"mode": "autumn",
+				"appPath": "/data/scripts/onescript-autumn-cart",
+				"acorn": "РасчетКорзины",
+				"timeout": 30
+			},
+			"id": "44444444-4444-4444-8444-444444444442",
+			"name": "OneScript",
+			"type": "CUSTOM.oneScript",
+			"typeVersion": 1,
+			"position": [560, 300]
+		}
+	],
+	"connections": {
+		"Запуск": {
+			"main": [
+				[
+					{
+						"node": "OneScript",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		}
+	},
+	"pinData": {
+		"Запуск": [
+			{
+				"json": {
+					"orderId": "B-77",
+					"customer": "Илья Орлов",
+					"lines": [
+						{
+							"type": "goods",
+							"sku": "CHAIR-OSK",
+							"name": "Стул «Осака»",
+							"qty": 2,
+							"price": 4590,
+							"discountPercent": 10
+						},
+						{
+							"type": "service",
+							"sku": "ASSEMBLY",
+							"name": "Сборка",
+							"qty": 1,
+							"price": 1000
+						},
+						{
+							"type": "delivery",
+							"sku": "DELIVERY",
+							"name": "Доставка по городу",
+							"qty": 1,
+							"price": 350
+						}
+					]
+				}
+			}
+		]
+	},
+	"settings": {
+		"executionOrder": "v1"
+	}
+}

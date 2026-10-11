@@ -10,8 +10,6 @@ export type OscriptRunResult = {
 };
 
 export class OscriptNotFoundError extends Error {
-	readonly stderr = '';
-
 	constructor() {
 		super('oscript не найден в PATH процесса n8n');
 		this.name = 'OscriptNotFoundError';
@@ -38,13 +36,13 @@ export class OscriptOutputLimitError extends Error {
 	}
 }
 
-export type RunOscriptOptions = {
+type RunOscriptOptions = {
 	args: string[];
 	cwd: string;
 	timeoutSeconds: number;
 };
 
-function killChild(child: ChildProcess): void {
+export function killChild(child: ChildProcess): void {
 	if (child.pid === undefined) {
 		return;
 	}

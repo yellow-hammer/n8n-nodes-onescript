@@ -1,0 +1,22 @@
+name: n8n-onescript
+
+services:
+  n8n:
+    build: .
+    image: n8n-onescript:local
+    ports:
+      - "5678:5678"
+    environment:
+      N8N_CUSTOM_EXTENSIONS: /opt/n8n-nodes-onescript/dist
+      GENERIC_TIMEZONE: Europe/Moscow
+      TZ: Europe/Moscow
+      N8N_SECURE_COOKIE: "false"
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_PERSONALIZATION_ENABLED: "false"
+    volumes:
+      - n8n_data:/root/.n8n
+      - ../examples:/data/scripts:ro
+      - ../dist:/opt/n8n-nodes-onescript/dist:ro
+
+volumes:
+  n8n_data:
