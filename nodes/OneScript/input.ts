@@ -1,6 +1,4 @@
-export const INPUT_VARIABLE = 'ВходящиеДанные';
-
-export const INPUT_WRAPPER = [
+const INPUT_WRAPPER = [
 	'// n8n-nodes-onescript: items прочитаны штатным ПрочитатьJSON.',
 	'// ВходящиеДанные — Массив. Объекты JSON читаются в Соответствие (второй аргумент Истина).',
 	'ЧтениеВходящихN8n = Новый ЧтениеJSON;',

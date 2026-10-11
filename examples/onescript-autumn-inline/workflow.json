@@ -1,0 +1,49 @@
+{
+	"name": "OneScript Autumn: код",
+	"nodes": [
+		{
+			"parameters": {},
+			"id": "66666666-6666-4666-8666-666666666661",
+			"name": "Запуск",
+			"type": "n8n-nodes-base.manualTrigger",
+			"typeVersion": 1,
+			"position": [240, 300]
+		},
+		{
+			"parameters": {
+				"mode": "code",
+				"code": "#native\n\n&Желудь\nПроцедура ПриСозданииОбъекта()\nКонецПроцедуры\n\nФункция Обработать(ВходящиеДанные) Экспорт\n\tДля Каждого Элемент Из ВходящиеДанные Цикл\n\t\tДанные = Элемент[\"json\"];\n\t\tДанные.Вставить(\"via\", \"autumn\");\n\tКонецЦикла;\n\tВозврат ВходящиеДанные;\nКонецФункции\n"
+			},
+			"id": "66666666-6666-4666-8666-666666666662",
+			"name": "OneScript",
+			"type": "CUSTOM.oneScript",
+			"typeVersion": 1,
+			"position": [560, 300]
+		}
+	],
+	"connections": {
+		"Запуск": {
+			"main": [
+				[
+					{
+						"node": "OneScript",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		}
+	},
+	"pinData": {
+		"Запуск": [
+			{
+				"json": {
+					"name": "Стул"
+				}
+			}
+		]
+	},
+	"settings": {
+		"executionOrder": "v1"
+	}
+}

@@ -1,6 +1,6 @@
 import type { IDataObject, INodeExecutionData } from 'n8n-workflow';
 
-export type StdoutParse = { kind: 'items'; items: INodeExecutionData[] } | { kind: 'text' };
+type StdoutParse = { kind: 'items'; items: INodeExecutionData[] } | { kind: 'text' };
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -16,6 +16,13 @@ function toItem(value: unknown): INodeExecutionData {
 	return { json: { value } as IDataObject };
 }
 
+export function valueToItems(value: unknown): { kind: 'items'; items: INodeExecutionData[] } {
+	if (Array.isArray(value)) {
+		return { kind: 'items', items: value.map((entry) => toItem(entry)) };
+	}
+	return { kind: 'items', items: [toItem(value)] };
+}
+
 export function stdoutToItems(stdout: string): StdoutParse {
 	const trimmed = stdout.replace(/^\uFEFF/, '').trim();
 	if (trimmed === '') {
@@ -29,11 +36,7 @@ export function stdoutToItems(stdout: string): StdoutParse {
 		return { kind: 'text' };
 	}
 
-	if (Array.isArray(parsed)) {
-		return { kind: 'items', items: parsed.map((entry) => toItem(entry)) };
-	}
-
-	return { kind: 'items', items: [toItem(parsed)] };
+	return valueToItems(parsed);
 }
 
 export function textResultItem(

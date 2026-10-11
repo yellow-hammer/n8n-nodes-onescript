@@ -1,0 +1,49 @@
+{
+	"name": "OneScript: simple",
+	"nodes": [
+		{
+			"parameters": {},
+			"id": "11111111-1111-4111-8111-111111111111",
+			"name": "Запуск",
+			"type": "n8n-nodes-base.manualTrigger",
+			"typeVersion": 1,
+			"position": [240, 300]
+		},
+		{
+			"parameters": {
+				"mode": "code",
+				"code": "// ВходящиеДанные уже заполнены обёрткой ноды.\n// У элемента ключ \"json\" — данные item n8n (Соответствие).\n\nЗапись = Новый ЗаписьJSON;\nЗапись.УстановитьСтроку();\nЗаписатьJSON(Запись, ВходящиеДанные);\nСообщить(Запись.Закрыть());\n"
+			},
+			"id": "11111111-1111-4111-8111-111111111112",
+			"name": "OneScript",
+			"type": "CUSTOM.oneScript",
+			"typeVersion": 1,
+			"position": [560, 300]
+		}
+	],
+	"connections": {
+		"Запуск": {
+			"main": [
+				[
+					{
+						"node": "OneScript",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		}
+	},
+	"pinData": {
+		"Запуск": [
+			{
+				"json": {
+					"name": "Стул"
+				}
+			}
+		]
+	},
+	"settings": {
+		"executionOrder": "v1"
+	}
+}

@@ -3,10 +3,9 @@ import { configWithoutCloudSupport } from '@n8n/node-cli/eslint';
 export default [
 	...configWithoutCloudSupport,
 	{
-		files: ['nodes/OneScript/runOscript.ts'],
+		files: ['nodes/OneScript/runOscript.ts', 'nodes/OneScript/autumnSession.ts'],
 		rules: {
-			// Нода для этого и существует: запуск бинарника oscript без оболочки.
-			// Аргументы — путь к сценарию и путь к JSON-файлу, не командная строка shell.
+			// spawn oscript без оболочки.
 			'@n8n/community-nodes/no-dangerous-functions': 'off',
 		},
 	},

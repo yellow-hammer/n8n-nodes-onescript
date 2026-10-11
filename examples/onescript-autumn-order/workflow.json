@@ -1,0 +1,68 @@
+{
+	"name": "OneScript Autumn: расчёт заказа",
+	"nodes": [
+		{
+			"parameters": {},
+			"id": "8d7103fc-3ad4-42fa-b21a-81c289ca86f9",
+			"name": "Запуск руками",
+			"type": "n8n-nodes-base.manualTrigger",
+			"typeVersion": 1,
+			"position": [240, 300]
+		},
+		{
+			"parameters": {
+				"mode": "autumn",
+				"appPath": "/data/scripts/onescript-autumn-order",
+				"acorn": "РасчетЗаказа",
+				"timeout": 30
+			},
+			"id": "63f9efa9-980c-4778-862d-477329f350a2",
+			"name": "Расчёт заказа",
+			"type": "CUSTOM.oneScript",
+			"typeVersion": 1,
+			"position": [560, 300]
+		}
+	],
+	"connections": {
+		"Запуск руками": {
+			"main": [
+				[
+					{
+						"node": "Расчёт заказа",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		}
+	},
+	"pinData": {
+		"Запуск руками": [
+			{
+				"json": {
+					"orderId": "A-1042",
+					"customer": "Мария Соколова",
+					"phone": "+7 900 000-00-00",
+					"lines": [
+						{
+							"sku": "CHAIR-OSK",
+							"name": "Стул «Осака»",
+							"qty": 2,
+							"price": 4590,
+							"discountPercent": 10
+						},
+						{
+							"sku": "DELIVERY",
+							"name": "Доставка по городу",
+							"qty": 1,
+							"price": 350
+						}
+					]
+				}
+			}
+		]
+	},
+	"settings": {
+		"executionOrder": "v1"
+	}
+}

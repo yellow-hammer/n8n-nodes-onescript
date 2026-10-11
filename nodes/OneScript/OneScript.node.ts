@@ -10,8 +10,10 @@ import type {
 } from 'n8n-workflow';
 import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
+import { isAutumnInline, writeAutumnInline } from './autumnInline';
+import { callAutumn } from './autumnSession';
 import { DEFAULT_CODE, wrapInlineCode } from './input';
-import { stdoutToItems, textResultItem } from './output';
+import { stdoutToItems, textResultItem, valueToItems } from './output';
 import {
 	MAX_TIMEOUT_SECONDS,
 	OscriptOutputLimitError,
@@ -20,9 +22,10 @@ import {
 	type OscriptRunResult,
 } from './runOscript';
 
-type SourceMode = 'code' | 'file';
+type SourceMode = 'code' | 'command' | 'file' | 'autumn';
 
-const SOURCE_MODES = ['code', 'file'] as const satisfies readonly SourceMode[];
+const SOURCE_MODES = ['code', 'command', 'file', 'autumn'] as const satisfies readonly SourceMode[];
+const MAX_COMMAND_LINE = 30000;
 
 function isSourceMode(value: string): value is SourceMode {
 	return (SOURCE_MODES as readonly string[]).includes(value);
@@ -88,8 +91,9 @@ export class OneScript implements INodeType {
 		icon: { light: 'file:onescript.svg', dark: 'file:onescript.dark.svg' },
 		group: ['transform'],
 		version: [1],
-		subtitle: '={{$parameter["mode"] === "file" ? "Файл" : "Код"}}',
-		description: 'Выполняет код OneScript через CLI oscript',
+		subtitle:
+			'={{$parameter["mode"] === "autumn" ? "Осень" : $parameter["mode"] === "file" ? "Файл" : $parameter["mode"] === "command" ? "Текст" : "Код"}}',
+		description: 'Выполняет код OneScript и желуди Осени',
 		defaults: {
 			name: 'OneScript',
 		},
@@ -106,12 +110,22 @@ export class OneScript implements INodeType {
 					{
 						name: 'Код в ноде',
 						value: 'code',
-						description: 'Выполнить текст из редактора этой ноды',
+						description: 'Записать текст во временный файл и выполнить его',
+					},
+					{
+						name: 'Текст в команде',
+						value: 'command',
+						description: 'Передать текст сценария в oscript ключом -c',
 					},
 					{
 						name: 'Файл на диске',
 						value: 'file',
 						description: 'Выполнить существующий файл на машине n8n',
+					},
+					{
+						name: 'Приложение Осени',
+						value: 'autumn',
+						description: 'Держать один процесс oscript и вызывать желудь',
 					},
 				],
 				default: 'code',
@@ -123,9 +137,7 @@ export class OneScript implements INodeType {
 				type: 'string',
 				typeOptions: {
 					editor: 'codeNodeEditor',
-					// javaScript включает сервис TypeScript и помечает идентификаторы BSL
-					// как неизвестные («Cannot find name»). html не проверяет имена.
-					// Свой язык и BSL Language Server редактор n8n из community-ноды не принимает.
+					// html не помечает идентификаторы BSL как неизвестные.
 					editorLanguage: 'html',
 					rows: 16,
 				},
@@ -133,11 +145,11 @@ export class OneScript implements INodeType {
 				required: true,
 				displayOptions: {
 					show: {
-						mode: ['code'],
+						mode: ['code', 'command'],
 					},
 				},
 				description:
-					'Сценарий OneScript. Если включена передача items, переменная ВходящиеДанные уже заполнена обёрткой.',
+					'Сценарий OneScript. При передаче items в режимах «Код в ноде» и «Текст в команде» данные уже в переменной ВходящиеДанные.',
 			},
 			{
 				displayName: 'Путь к файлу',
@@ -145,7 +157,7 @@ export class OneScript implements INodeType {
 				type: 'string',
 				default: '',
 				required: true,
-				placeholder: '/data/scripts/echo-items.os',
+				placeholder: '/data/scripts/onescript/echo-items.os',
 				displayOptions: {
 					show: {
 						mode: ['file'],
@@ -153,6 +165,36 @@ export class OneScript implements INodeType {
 				},
 				description:
 					'Путь к .os-файлу на машине, где запущен n8n. Относительный путь считается от рабочего каталога процесса n8n.',
+			},
+			{
+				displayName: 'Каталог приложения',
+				name: 'appPath',
+				type: 'string',
+				default: '',
+				required: true,
+				placeholder: '/data/scripts/onescript-autumn',
+				displayOptions: {
+					show: {
+						mode: ['autumn'],
+					},
+				},
+				description:
+					'Корень приложения Осени. Относительный путь считается от каталога процесса n8n. Классы: src/Классы, Классы, src/Classes, Classes или lib.config. Один процесс oscript на этот каталог.',
+			},
+			{
+				displayName: 'Желудь',
+				name: 'acorn',
+				type: 'string',
+				default: 'Эхо',
+				required: true,
+				placeholder: 'Эхо',
+				displayOptions: {
+					show: {
+						mode: ['autumn'],
+					},
+				},
+				description:
+					'Имя желудя. Нода вызывает экспортную функцию Обработать и передаёт ей массив items.',
 			},
 			{
 				displayName: 'Таймаут (сек.)',
@@ -164,15 +206,21 @@ export class OneScript implements INodeType {
 					numberPrecision: 0,
 				},
 				default: 30,
-				description: 'Сколько секунд ждать завершения oscript. По истечении процесс останавливается.',
+				description:
+					'Сколько секунд ждать завершения oscript. По истечении процесс останавливается. В режиме Осени останавливается общий процесс, следующий запуск поднимает его заново.',
 			},
 			{
 				displayName: 'Передать входящие данные',
 				name: 'passInput',
 				type: 'boolean',
 				default: true,
+				displayOptions: {
+					show: {
+						mode: ['code', 'command', 'file'],
+					},
+				},
 				description:
-					'Записать items в JSON-файл и передать путь к нему первым аргументом oscript. В режиме «код в ноде» обёртка читает файл в переменную ВходящиеДанные.',
+					'Записать items в JSON и передать путь в АргументыКоманднойСтроки[0]. В режимах кода и команды он читается в ВходящиеДанные.',
 			},
 		],
 	};
@@ -200,9 +248,16 @@ async function runOneScript(context: IExecuteFunctions): Promise<INodeExecutionD
 
 	const node = context.getNode();
 	const timeoutSeconds = readTimeout(node, context.getNodeParameter('timeout', 0));
-	const passInput = context.getNodeParameter('passInput', 0) as boolean;
 	const items = context.getInputData();
+	if (mode === 'autumn') {
+		try {
+			return await runAutumn(context, items, timeoutSeconds);
+		} catch (error) {
+			rethrowRunError(context, error);
+		}
+	}
 
+	const passInput = context.getNodeParameter('passInput', 0) as boolean;
 	const directory = await mkdtemp(join(tmpdir(), 'n8n-onescript-'));
 	try {
 		let inputPath: string | undefined;
@@ -232,13 +287,7 @@ async function runOneScript(context: IExecuteFunctions): Promise<INodeExecutionD
 				: [textResultItem(result.stdout, result.stderr, result.exitCode)];
 		return attachPairedItem(produced, items.length);
 	} catch (error) {
-		const message = error instanceof Error ? error.message : String(error);
-		const stderr =
-			error instanceof OscriptTimeoutError || error instanceof OscriptOutputLimitError
-				? error.stderr.trim()
-				: '';
-		const text = stderr === '' ? message : `${message}\n${stderr}`;
-		throw new NodeOperationError(context.getNode(), text);
+		rethrowRunError(context, error);
 	} finally {
 		await rm(directory, { recursive: true, force: true });
 	}
@@ -253,12 +302,14 @@ type RunContext = {
 
 async function runByMode(
 	context: IExecuteFunctions,
-	mode: SourceMode,
+	mode: 'code' | 'command' | 'file',
 	run: RunContext,
 ): Promise<OscriptRunResult> {
 	switch (mode) {
 		case 'code':
 			return runInline(context, run);
+		case 'command':
+			return runCommand(context, run);
 		case 'file':
 			return runFile(context, run);
 		default: {
@@ -274,9 +325,68 @@ async function runInline(context: IExecuteFunctions, run: RunContext): Promise<O
 		throw new NodeOperationError(context.getNode(), 'Код OneScript пуст.');
 	}
 
+	if (isAutumnInline(code)) {
+		const scriptPath = await writeAutumnInline(run.directory, code);
+		return executeScript(scriptPath, run.directory, run.passInput, run.inputPath, run.timeoutSeconds);
+	}
+
 	const scriptPath = join(run.directory, 'script.os');
 	await writeFile(scriptPath, wrapInlineCode(code, run.passInput), 'utf8');
 	return executeScript(scriptPath, run.directory, run.passInput, run.inputPath, run.timeoutSeconds);
+}
+
+async function runCommand(context: IExecuteFunctions, run: RunContext): Promise<OscriptRunResult> {
+	const code = context.getNodeParameter('code', 0) as string;
+	if (code.trim() === '') {
+		throw new NodeOperationError(context.getNode(), 'Код OneScript пуст.');
+	}
+
+	const source = wrapInlineCode(code, run.passInput);
+	const args =
+		run.passInput && run.inputPath !== undefined ? ['-c', source, run.inputPath] : ['-c', source];
+	const commandLength = args.reduce((sum, arg) => sum + arg.length + 1, 'oscript'.length);
+	if (commandLength > MAX_COMMAND_LINE) {
+		throw new NodeOperationError(
+			context.getNode(),
+			'Текст сценария длиннее, чем принимает команда oscript -c. Для длинного сценария используйте режим «Код в ноде».',
+		);
+	}
+
+	return runOscript({ args, cwd: run.directory, timeoutSeconds: run.timeoutSeconds });
+}
+
+async function runAutumn(
+	context: IExecuteFunctions,
+	items: INodeExecutionData[],
+	timeoutSeconds: number,
+): Promise<INodeExecutionData[]> {
+	const appPath = (context.getNodeParameter('appPath', 0) as string).trim();
+	const acorn = (context.getNodeParameter('acorn', 0) as string).trim();
+	if (appPath === '') {
+		throw new NodeOperationError(context.getNode(), 'Путь к приложению Осени пуст.');
+	}
+	if (acorn === '') {
+		throw new NodeOperationError(context.getNode(), 'Имя желудя пусто.');
+	}
+
+	const absolutePath = isAbsolute(appPath) ? appPath : resolve(process.cwd(), appPath);
+	const body = await callAutumn({
+		appPath: absolutePath,
+		acorn,
+		items: items.map((item) => ({ json: item.json })),
+		timeoutSeconds,
+	});
+	return attachPairedItem(valueToItems(body).items, items.length);
+}
+
+function rethrowRunError(context: IExecuteFunctions, error: unknown): never {
+	const message = error instanceof Error ? error.message : String(error);
+	const stderr =
+		error instanceof OscriptTimeoutError || error instanceof OscriptOutputLimitError
+			? error.stderr.trim()
+			: '';
+	const text = stderr === '' ? message : `${message}\n${stderr}`;
+	throw new NodeOperationError(context.getNode(), text);
 }
 
 async function runFile(context: IExecuteFunctions, run: RunContext): Promise<OscriptRunResult> {

@@ -1,0 +1,299 @@
+{
+	"name": "OneScript Autumn: ветки",
+	"nodes": [
+		{
+			"parameters": {},
+			"id": "55555555-5555-4555-8555-555555555551",
+			"name": "Запуск",
+			"type": "n8n-nodes-base.manualTrigger",
+			"typeVersion": 1,
+			"position": [0, 300]
+		},
+		{
+			"parameters": {
+				"mode": "autumn",
+				"appPath": "/data/scripts/onescript-autumn-branches",
+				"acorn": "РазборКорзины",
+				"timeout": 30
+			},
+			"id": "55555555-5555-4555-8555-555555555552",
+			"name": "Разбор",
+			"type": "CUSTOM.oneScript",
+			"typeVersion": 1,
+			"position": [260, 300]
+		},
+		{
+			"parameters": {
+				"rules": {
+					"values": [
+						{
+							"conditions": {
+								"options": {
+									"caseSensitive": true,
+									"leftValue": "",
+									"typeValidation": "strict"
+								},
+								"conditions": [
+									{
+										"leftValue": "={{ $json.type }}",
+										"rightValue": "goods",
+										"operator": {
+											"type": "string",
+											"operation": "equals"
+										}
+									}
+								],
+								"combinator": "and"
+							},
+							"renameOutput": true,
+							"outputKey": "товар"
+						},
+						{
+							"conditions": {
+								"options": {
+									"caseSensitive": true,
+									"leftValue": "",
+									"typeValidation": "strict"
+								},
+								"conditions": [
+									{
+										"leftValue": "={{ $json.type }}",
+										"rightValue": "service",
+										"operator": {
+											"type": "string",
+											"operation": "equals"
+										}
+									}
+								],
+								"combinator": "and"
+							},
+							"renameOutput": true,
+							"outputKey": "услуга"
+						},
+						{
+							"conditions": {
+								"options": {
+									"caseSensitive": true,
+									"leftValue": "",
+									"typeValidation": "strict"
+								},
+								"conditions": [
+									{
+										"leftValue": "={{ $json.type }}",
+										"rightValue": "delivery",
+										"operator": {
+											"type": "string",
+											"operation": "equals"
+										}
+									}
+								],
+								"combinator": "and"
+							},
+							"renameOutput": true,
+							"outputKey": "доставка"
+						}
+					]
+				},
+				"options": {}
+			},
+			"id": "55555555-5555-4555-8555-555555555553",
+			"name": "Ветки",
+			"type": "n8n-nodes-base.switch",
+			"typeVersion": 3.4,
+			"position": [520, 300]
+		},
+		{
+			"parameters": {
+				"mode": "autumn",
+				"appPath": "/data/scripts/onescript-autumn-branches",
+				"acorn": "РасчетТовара",
+				"timeout": 30
+			},
+			"id": "55555555-5555-4555-8555-555555555554",
+			"name": "Товар",
+			"type": "CUSTOM.oneScript",
+			"typeVersion": 1,
+			"position": [800, 80]
+		},
+		{
+			"parameters": {
+				"mode": "autumn",
+				"appPath": "/data/scripts/onescript-autumn-branches",
+				"acorn": "РасчетУслуги",
+				"timeout": 30
+			},
+			"id": "55555555-5555-4555-8555-555555555555",
+			"name": "Услуга",
+			"type": "CUSTOM.oneScript",
+			"typeVersion": 1,
+			"position": [800, 300]
+		},
+		{
+			"parameters": {
+				"mode": "autumn",
+				"appPath": "/data/scripts/onescript-autumn-branches",
+				"acorn": "РасчетДоставки",
+				"timeout": 30
+			},
+			"id": "55555555-5555-4555-8555-555555555556",
+			"name": "Доставка",
+			"type": "CUSTOM.oneScript",
+			"typeVersion": 1,
+			"position": [800, 520]
+		},
+		{
+			"parameters": {
+				"mode": "append",
+				"numberInputs": 3
+			},
+			"id": "55555555-5555-4555-8555-555555555557",
+			"name": "Сборка",
+			"type": "n8n-nodes-base.merge",
+			"typeVersion": 3.2,
+			"position": [1080, 300]
+		},
+		{
+			"parameters": {
+				"mode": "autumn",
+				"appPath": "/data/scripts/onescript-autumn-branches",
+				"acorn": "ИтогКорзины",
+				"timeout": 30
+			},
+			"id": "55555555-5555-4555-8555-555555555558",
+			"name": "Итог",
+			"type": "CUSTOM.oneScript",
+			"typeVersion": 1,
+			"position": [1320, 300]
+		}
+	],
+	"connections": {
+		"Запуск": {
+			"main": [
+				[
+					{
+						"node": "Разбор",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Разбор": {
+			"main": [
+				[
+					{
+						"node": "Ветки",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Ветки": {
+			"main": [
+				[
+					{
+						"node": "Товар",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Услуга",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Доставка",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Товар": {
+			"main": [
+				[
+					{
+						"node": "Сборка",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Услуга": {
+			"main": [
+				[
+					{
+						"node": "Сборка",
+						"type": "main",
+						"index": 1
+					}
+				]
+			]
+		},
+		"Доставка": {
+			"main": [
+				[
+					{
+						"node": "Сборка",
+						"type": "main",
+						"index": 2
+					}
+				]
+			]
+		},
+		"Сборка": {
+			"main": [
+				[
+					{
+						"node": "Итог",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		}
+	},
+	"pinData": {
+		"Запуск": [
+			{
+				"json": {
+					"orderId": "B-77",
+					"customer": "Илья Орлов",
+					"lines": [
+						{
+							"type": "goods",
+							"sku": "CHAIR-OSK",
+							"name": "Стул «Осака»",
+							"qty": 2,
+							"price": 4590,
+							"discountPercent": 10
+						},
+						{
+							"type": "service",
+							"sku": "ASSEMBLY",
+							"name": "Сборка",
+							"qty": 1,
+							"price": 1000
+						},
+						{
+							"type": "delivery",
+							"sku": "DELIVERY",
+							"name": "Доставка по городу",
+							"qty": 1,
+							"price": 350
+						}
+					]
+				}
+			}
+		]
+	},
+	"settings": {
+		"executionOrder": "v1"
+	}
+}

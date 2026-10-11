@@ -16,14 +16,15 @@
 		"url": "git+https://github.com/yellow-hammer/n8n-nodes-onescript.git"
 	},
 	"scripts": {
-		"build": "n8n-node build",
+		"build": "n8n-node build && node scripts/copy-host.mjs",
 		"build:watch": "tsc --watch",
 		"dev": "n8n-node dev",
 		"lint": "n8n-node lint",
 		"lint:fix": "n8n-node lint --fix",
 		"release": "n8n-node release",
 		"prepublishOnly": "n8n-node prerelease",
-		"check": "node scripts/check-output.mjs"
+		"check": "node scripts/check-output.mjs && node scripts/check-autumn-protocol.mjs",
+		"check:autumn": "node scripts/check-command.mjs && node scripts/check-autumn-inline.mjs && node scripts/check-autumn.mjs"
 	},
 	"files": [
 		"dist",

@@ -1,0 +1,51 @@
+{
+	"name": "OneScript Autumn: simple",
+	"nodes": [
+		{
+			"parameters": {},
+			"id": "22222222-2222-4222-8222-222222222221",
+			"name": "Запуск",
+			"type": "n8n-nodes-base.manualTrigger",
+			"typeVersion": 1,
+			"position": [240, 300]
+		},
+		{
+			"parameters": {
+				"mode": "autumn",
+				"appPath": "/data/scripts/onescript-autumn",
+				"acorn": "Эхо",
+				"timeout": 30
+			},
+			"id": "22222222-2222-4222-8222-222222222222",
+			"name": "OneScript",
+			"type": "CUSTOM.oneScript",
+			"typeVersion": 1,
+			"position": [560, 300]
+		}
+	],
+	"connections": {
+		"Запуск": {
+			"main": [
+				[
+					{
+						"node": "OneScript",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		}
+	},
+	"pinData": {
+		"Запуск": [
+			{
+				"json": {
+					"name": "Стул"
+				}
+			}
+		]
+	},
+	"settings": {
+		"executionOrder": "v1"
+	}
+}
