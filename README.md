@@ -55,3 +55,7 @@ docker compose -f docker/docker-compose.yml up --build
 
 - [Boosty](https://boosty.to/1carlo/donate)
 - [Чаевые](https://pay.cloudtips.ru/p/d752cb43)
+
+[![Infostart](https://infostart.ru/bitrix/templates/sandbox_empty/assets/tpl/abo/img/logo.svg)](https://infostart.ru/1c/articles/2814642/)
+
+Публикация на Infostart: [Как начать использовать n8n, если вы из мира 1С](https://infostart.ru/1c/articles/2814642/)
