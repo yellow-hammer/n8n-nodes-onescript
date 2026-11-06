@@ -5,6 +5,16 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 и этот проект придерживается [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.2.1] - 2026-11-06
+
+
+### Документация
+
+- Добавили в README ссылку на публикацию Infostart и логотип
+
+- Обновил LICENSE.md
+
+
 ## [0.2.0] - 2026-10-11
 
 
